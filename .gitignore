@@ -1,0 +1,8 @@
+dist/
+target/
+**/*.rs.bk
+bin/
+pkg/
+wasm-pack.log
+.cargo-ok
+.DS_Store
