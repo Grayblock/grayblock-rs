@@ -16,4 +16,8 @@ Monorepo for Grayblock Power's Rust Projects
 
 ## Usage
 
-To run development server: `trunk serve`
+To bootstrap dependencies: `make bootstrap`
+
+To run development server: `make dev`
+
+To run production server: `make build`
