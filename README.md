@@ -20,4 +20,4 @@ To bootstrap dependencies: `make bootstrap`
 
 To run development server: `make dev`
 
-To run production server: `make build`
+To run production server: `make run`
