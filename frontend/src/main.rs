@@ -27,13 +27,13 @@ impl TryFrom<&str> for Route {
     fn try_from(s: &str) -> Result<Route, String> {
         trace!("route try_from: {}", s);
         // remove the scheme, if it has one
-        let hash_split = s.split("#").collect::<Vec<_>>();
+        let hash_split = s.split('#').collect::<Vec<_>>();
         let after_hash = match hash_split.as_slice() {
             [_, after] => Ok(after),
             _ => Err(format!("route must have a hash: {}", s)),
         }?;
 
-        let paths: Vec<&str> = after_hash.split("/").collect::<Vec<_>>();
+        let paths: Vec<&str> = after_hash.split('/').collect::<Vec<_>>();
         trace!("route paths: {:?}", paths);
 
         match paths.as_slice() {
@@ -164,30 +164,25 @@ async fn logic(
     tx_view: broadcast::Sender<AppError>,
     tx_route_patch: mpmc::Sender<ListPatch<ViewBuilder<Dom>>>,
 ) {
-    loop {
-        match rx_logic.next().await {
-            Some(AppModel::HashChange(hash)) => {
-                // When we get a hash change, attempt to convert it into one of our routes
-                match Route::try_from(hash.as_str()) {
-                    // If we can't, let's send an error message to the view
-                    Err(msg) => {
-                        tx_view.broadcast(AppError(msg)).await.unwrap();
-                    }
-                    // If we _can_, create a new view from the route and send a patch message to
-                    // the view
-                    Ok(new_route) => {
-                        trace!("got new route: {:?}", new_route);
-                        if new_route != route {
-                            let builder = ViewBuilder::from(&new_route);
-                            route = new_route;
-                            let patch = ListPatch::replace(2, builder);
-                            tx_route_patch.send(patch).await.unwrap();
-                        }
-                        tx_view.broadcast(AppError("".to_string())).await.unwrap();
-                    }
-                }
+    while let Some(AppModel::HashChange(hash)) = rx_logic.next().await {
+        // When we get a hash change, attempt to convert it into one of our routes
+        match Route::try_from(hash.as_str()) {
+            // If we can't, let's send an error message to the view
+            Err(msg) => {
+                tx_view.broadcast(AppError(msg)).await.unwrap();
             }
-            None => break,
+            // If we _can_, create a new view from the route and send a patch message to
+            // the view
+            Ok(new_route) => {
+                trace!("got new route: {:?}", new_route);
+                if new_route != route {
+                    let builder = ViewBuilder::from(&new_route);
+                    route = new_route;
+                    let patch = ListPatch::replace(2, builder);
+                    tx_route_patch.send(patch).await.unwrap();
+                }
+                tx_view.broadcast(AppError("".to_string())).await.unwrap();
+            }
         }
     }
 }
