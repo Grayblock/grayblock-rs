@@ -14,7 +14,7 @@ Monorepo for Grayblock Power's Rust Projects
 
 ### Backend
 
-- [https://docs.rs/warp](warp) - Server, replaces express
+- [warp](https://docs.rs/warp) - Server, replaces express
 
 ## Usage
 

@@ -58,52 +58,70 @@ mod test {
     }
 }
 
-mod counter {
+mod component {
     use mogwai::prelude::{stream::select_all, *};
+    use stylist::style;
 
     #[derive(Clone)]
     pub enum ConnectButtonMsg {
-        Connect,
         #[allow(dead_code)]
+        Connect,
         Connecting,
         Connected,
     }
 
     fn view(
-        send_clicks_to_logic: broadcast::Sender<ConnectButtonMsg>,
-        recv_num_clicks: broadcast::Receiver<u32>,
+        send_connect_events: broadcast::Sender<ConnectButtonMsg>,
+        recv_connect_status: broadcast::Receiver<String>,
     ) -> ViewBuilder<Dom> {
+        let style = style!(
+            r#"
+                background-color: #1fc7d4;
+                color: #fff;
+                width: 100%;
+                padding: 24px;
+                height: 48px;
+                font-size: 16px;
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 16px;
+                border: none;
+                outline: none;
+            "#
+        )
+        .unwrap();
+
         builder! {
-            <button on:click=send_clicks_to_logic.sink().with(|_| async{Ok(ConnectButtonMsg::Connect)})>
+            <button
+                class={style.get_class_name()}
+                on:click=send_connect_events.sink().with(|_| async{Ok(ConnectButtonMsg::Connecting)})
+            >
             {(
-                "clicks = 0",
-                recv_num_clicks.map(|n| format!("clicks = {}", n))
+                "Connect",
+                recv_connect_status.map(|status| status)
             )}
             </button>
         }
     }
 
     async fn logic(
-        mut recv_msg: impl Stream<Item = ConnectButtonMsg> + Unpin,
-        send_num_clicks: broadcast::Sender<u32>,
+        mut recv_connect_events: impl Stream<Item = ConnectButtonMsg> + Unpin,
+        send_connect_status: broadcast::Sender<String>,
     ) {
-        let mut clicks: u32 = 0;
-
         loop {
-            match recv_msg.next().await {
-                Some(ConnectButtonMsg::Connect) => {
-                    clicks += 1;
-                }
-                Some(ConnectButtonMsg::Connecting) => {
-                    clicks += 1;
-                }
-                Some(ConnectButtonMsg::Connected) => {
-                    clicks = 0;
-                }
+            let status = match recv_connect_events.next().await {
+                Some(ConnectButtonMsg::Connect) => "Connect",
+                Some(ConnectButtonMsg::Connecting) => "Connecting...",
+                Some(ConnectButtonMsg::Connected) => "Connected",
                 None => break,
             };
 
-            send_num_clicks.broadcast(clicks).await.unwrap();
+            send_connect_status
+                .broadcast(status.to_string())
+                .await
+                .unwrap();
         }
     }
 
@@ -126,12 +144,12 @@ fn view(counter: Component<Dom>, _send_reset_to_app: broadcast::Sender<()>) -> V
 }
 
 async fn logic(
-    send_reset_to_counter: broadcast::Sender<counter::ConnectButtonMsg>,
+    send_reset_to_counter: broadcast::Sender<component::ConnectButtonMsg>,
     mut recv_connect: broadcast::Receiver<()>,
 ) {
     while let Some(()) = recv_connect.next().await {
         send_reset_to_counter
-            .broadcast(counter::ConnectButtonMsg::Connected)
+            .broadcast(component::ConnectButtonMsg::Connected)
             .await
             .unwrap();
     }
@@ -142,7 +160,7 @@ pub fn new() -> Component<Dom> {
     let (send_reset_to_app, recv_connect_from_app) = broadcast::bounded(1);
 
     let app_logic = logic(send_counter_msg, recv_connect_from_app);
-    let counter = counter::counter(recv_counter_msg);
+    let counter = component::counter(recv_counter_msg);
     let app_view = view(counter, send_reset_to_app);
     Component::from(app_view).with_logic(app_logic)
 }
