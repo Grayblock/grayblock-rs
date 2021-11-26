@@ -6,9 +6,9 @@ Monorepo for Grayblock Power's Rust Projects
 
 ### Frontend
 
-- [https://docs.rs/crate/trunk](trunk) - For WASM builds and livereload, replaces webpack
-- [https://docs.rs/mogwai](mogwai) - For vdom, replaces react
-- [https://docs.rs/web3](web3) - For web3, replaces ethers
+- [trunk](https://docs.rs/crate/trunk) - For WASM builds and livereload, replaces webpack
+- [mogwai](https://docs.rs/mogwai) - For vdom, replaces react
+- [web3](https://docs.rs/web3) - For web3, replaces ethers
 
 ### Backend
 

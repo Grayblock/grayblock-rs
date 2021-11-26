@@ -1,5 +1,6 @@
 {
-    "editor.defaultFormatter": "matklad.rust-analyzer",
-    "editor.formatOnSave": true,
-    "files.autoSave": "onFocusChange"
+  "editor.defaultFormatter": "matklad.rust-analyzer",
+  "editor.formatOnSave": true,
+  "files.autoSave": "onFocusChange",
+  "rust-analyzer.checkOnSave.command": "clippy"
 }

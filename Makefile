@@ -2,19 +2,19 @@ bootstrap:
 	cargo install --force --locked trunk
 
 dev:
-	cd frontend && trunk serve
+	cd frontend && trunk serve --release
 
-dev-all:
-	cd frontend && cargo check && trunk build
-	cd design && cargo check && trunk build
-	cd backend && cargo check && cargo build
+all:
+	cd frontend && cargo check && trunk build --release
+	cd design && cargo check && trunk build --release
+	cd backend && cargo check && RUSTFLAGS="-Ctarget-cpu=native" cargo build --release
 
 ui:
-	cd design && trunk serve
+	cd design && trunk serve --release
 
-release-build:
+release:
 	cd frontend && trunk build --release
 	cd backend && RUSTFLAGS="-Ctarget-cpu=native" cargo build --release
 
-run: release-build
+run: release
 	target/release/grayblock-backend
