@@ -1,2 +1,6 @@
 [workspace]
 members = ["frontend", "design", "backend"]
+
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"

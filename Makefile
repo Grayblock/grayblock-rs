@@ -1,13 +1,15 @@
 bootstrap:
+	rustup update
+	rustup component add clippy
 	cargo install --force --locked trunk
 
 dev:
 	cd frontend && trunk serve --release
 
 all:
-	cd frontend && cargo check && trunk build --release
-	cd design && cargo check && trunk build --release
-	cd backend && cargo check && RUSTFLAGS="-Ctarget-cpu=native" cargo build --release
+	cd frontend && cargo clippy && trunk build --release
+	cd design && cargo clippy && trunk build --release
+	cd backend && cargo clippy && RUSTFLAGS="-Ctarget-cpu=native" cargo build --release
 
 ui:
 	cd design && trunk serve --release
@@ -18,3 +20,10 @@ release:
 
 run: release
 	target/release/grayblock-backend
+
+clean:
+	rm -rf target frontend/dist
+
+ci:
+	cargo clippy -- -D warnings
+	cargo test

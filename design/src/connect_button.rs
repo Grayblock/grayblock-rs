@@ -64,6 +64,7 @@ mod counter {
     #[derive(Clone)]
     pub enum ConnectButtonMsg {
         Connect,
+        #[allow(dead_code)]
         Connecting,
         Connected,
     }
