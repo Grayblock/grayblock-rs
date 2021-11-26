@@ -1,5 +1,6 @@
 [package]
-name = "grayblock-frontend"
+name = "grayblock-ui"
+description = "Grayblock's Mogwai UI components library and design system"
 version = "0.0.0"
 edition = "2021"
 publish = false
