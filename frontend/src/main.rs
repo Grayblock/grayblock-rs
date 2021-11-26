@@ -2,12 +2,9 @@
 use log::{trace, Level};
 use mogwai::prelude::*;
 use std::panic;
+use stylist::style;
 use wasm_bindgen::prelude::*;
 use web_sys::HashChangeEvent;
-
-#[cfg(feature = "wee_alloc")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 /// Here we enumerate all our app's routes.
 #[derive(Clone, Debug, PartialEq)]
@@ -93,10 +90,30 @@ impl From<Route> for String {
 /// is just one of many ways to accomplish that.
 impl From<&Route> for ViewBuilder<Dom> {
     fn from(route: &Route) -> Self {
+        let button = style!(
+            r#"
+                background-color: #1fc7d4;
+                color: #fff;
+                width: 100%;
+                padding: 24px;
+                height: 48px;
+                font-size: 16px;
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 16px;
+                border: none;
+                outline: none;
+            "#
+        )
+        .unwrap();
+
         match route {
             Route::Home => builder! {
                 <main>
                     <h1>"Welcome to the homepage"</h1>
+                    <button class={button.get_class_name()}>"Unlock Wallet"</button>
                 </main>
             },
             Route::Settings => builder! {
