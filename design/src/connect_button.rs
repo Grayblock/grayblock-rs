@@ -1,80 +1,40 @@
-#![allow(unused_braces)]
 use mogwai::prelude::*;
+use stylist::style;
 
-#[cfg(test)]
-mod test {
-    use mogwai::prelude::*;
-
-    #[test]
-    fn can_component_from_viewbuilder() {
-        let _comp = Component::from(builder! {
-            <div id="my_component">
-                <p>"Hello!"</p>
-            </div>
-        });
-    }
-
-    #[test]
-    fn can_component_logic() {
-        let (tx, rx) = broadcast::bounded::<u32>(1);
-        let comp = Component::from(builder! {
-            <div id="my_component">
-                <p>
-                    {("initial value", rx.map(|n| format!("got message: {}", n)))}
-                </p>
-            </div>
-        })
-        .with_logic(async move {
-            tx.broadcast(1).await.unwrap();
-            tx.broadcast(42).await.unwrap();
-        });
-        let view: View<Dom> = comp.build().unwrap();
-        view.run().unwrap();
-    }
-
-    #[test]
-    fn can_more_component_logic() {
-        let (tx_logic, mut rx_logic) = broadcast::bounded::<()>(1);
-        let (tx_view, rx_view) = broadcast::bounded::<u32>(1);
-
-        let comp = Component::from(builder! {
-            <div id="my_component" on:click=tx_logic.sink().contra_map(|_| ())>
-                <p>
-                    {("initial value", rx_view.map(|n| format!("got clicks: {}", n)))}
-                </p>
-            </div>
-        })
-        .with_logic(async move {
-            let mut clicks = 0;
-            tx_view.broadcast(clicks).await.unwrap();
-
-            while let Some(()) = rx_logic.next().await {
-                clicks += 1;
-                tx_view.broadcast(clicks).await.unwrap();
-            }
-        });
-        let view: View<Dom> = comp.build().unwrap();
-        view.run().unwrap();
-    }
+pub struct ConnectButton {
+    pub status: State,
 }
 
-mod component {
-    use mogwai::prelude::{stream::select_all, *};
-    use stylist::style;
+#[derive(Clone)]
+pub enum State {
+    Connect,
+    Connecting,
+    Connected,
+    Error,
+}
 
-    #[derive(Clone)]
-    pub enum ConnectButtonMsg {
-        #[allow(dead_code)]
-        Connect,
-        Connecting,
-        Connected,
+impl IsElmComponent for ConnectButton {
+    type LogicMsg = State;
+    type ViewMsg = State;
+    type ViewNode = Dom;
+
+    fn update(&mut self, msg: State, tx_view: broadcast::Sender<State>) {
+        if let State::Connect = msg {
+            self.status = State::Connecting;
+            let out = State::Connecting;
+            mogwai::spawn(async move {
+                // TODO: web3
+                tx_view.broadcast(out).await.unwrap();
+            });
+        }
     }
 
     fn view(
-        send_connect_events: broadcast::Sender<ConnectButtonMsg>,
-        recv_connect_status: broadcast::Receiver<String>,
+        &self,
+        tx: broadcast::Sender<State>,
+        rx: broadcast::Receiver<State>,
     ) -> ViewBuilder<Dom> {
-        let style = style!(
+        let styles = style!(
             r#"
                 background-color: #1fc7d4;
                 color: #fff;
@@ -89,78 +49,35 @@ mod component {
                 border-radius: 16px;
                 border: none;
                 outline: none;
+                cursor: pointer;
             "#
         )
         .unwrap();
 
         builder! {
-            <button
-                class={style.get_class_name()}
-                on:click=send_connect_events.sink().with(|_| async{Ok(ConnectButtonMsg::Connecting)})
-            >
-            {(
-                "Connect",
-                recv_connect_status.map(|status| status)
-            )}
+            <button class={styles.get_class_name()} on:click=tx.sink().with(|_| async {Ok(State::Connect)})>
+                {(
+                    map_status(&self.status),
+                    rx.map(|msg| map_status(&msg))
+                )}
             </button>
         }
     }
-
-    async fn logic(
-        mut recv_connect_events: impl Stream<Item = ConnectButtonMsg> + Unpin,
-        send_connect_status: broadcast::Sender<String>,
-    ) {
-        loop {
-            let status = match recv_connect_events.next().await {
-                Some(ConnectButtonMsg::Connect) => "Connect",
-                Some(ConnectButtonMsg::Connecting) => "Connecting...",
-                Some(ConnectButtonMsg::Connected) => "Connected",
-                None => break,
-            };
-
-            send_connect_status
-                .broadcast(status.to_string())
-                .await
-                .unwrap();
-        }
-    }
-
-    pub fn counter(recv_parent_msg: broadcast::Receiver<ConnectButtonMsg>) -> Component<Dom> {
-        let (send_self_msg, recv_self_msg) = broadcast::bounded(1);
-        let (send_num_clicks, recv_num_clicks) = broadcast::bounded(1);
-        let counter_view = view(send_self_msg, recv_num_clicks);
-        let counter_logic = logic(
-            select_all(vec![recv_self_msg, recv_parent_msg]),
-            send_num_clicks,
-        );
-        Component::from(counter_view).with_logic(counter_logic)
-    }
 }
 
-fn view(counter: Component<Dom>, _send_reset_to_app: broadcast::Sender<()>) -> ViewBuilder<Dom> {
-    builder! {
-        <div>{counter}</div>
+fn map_status(status: &State) -> String {
+    match status {
+        State::Connect => "Connect",
+        State::Connecting => "Connecting...",
+        State::Connected => "Connected",
+        State::Error => "Error",
     }
-}
-
-async fn logic(
-    send_reset_to_counter: broadcast::Sender<component::ConnectButtonMsg>,
-    mut recv_connect: broadcast::Receiver<()>,
-) {
-    while let Some(()) = recv_connect.next().await {
-        send_reset_to_counter
-            .broadcast(component::ConnectButtonMsg::Connected)
-            .await
-            .unwrap();
-    }
+    .to_string()
 }
 
 pub fn new() -> Component<Dom> {
-    let (send_counter_msg, recv_counter_msg) = broadcast::bounded(1);
-    let (send_reset_to_app, recv_connect_from_app) = broadcast::bounded(1);
-
-    let app_logic = logic(send_counter_msg, recv_connect_from_app);
-    let counter = component::counter(recv_counter_msg);
-    let app_view = view(counter, send_reset_to_app);
-    Component::from(app_view).with_logic(app_logic)
+    ConnectButton {
+        status: State::Connect,
+    }
+    .to_component()
 }
