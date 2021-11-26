@@ -1,5 +1,7 @@
 # Grayblock Power
 
+[![Rust](https://github.com/Grayblock/grayblock-rs/actions/workflows/rust.yml/badge.svg)](https://github.com/Grayblock/grayblock-rs/actions/workflows/rust.yml)
+
 Monorepo for Grayblock Power's Rust Projects
 
 ## Dependencies
