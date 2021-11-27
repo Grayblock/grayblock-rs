@@ -22,6 +22,7 @@ mogwai = "0.5"
 web3 = { version = "0.18.0", git = "https://github.com/tomusdrw/rust-web3.git", rev = "5f8b29e643964d4b0fbef683966a83c38c042603", default-features = false, features = [
     "wasm",
     "eip-1193",
+    "signing",
 ] }
 stylist = "0.9.2"
 

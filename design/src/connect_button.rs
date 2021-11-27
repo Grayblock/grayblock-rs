@@ -1,5 +1,10 @@
+use log::info;
 use mogwai::prelude::*;
 use stylist::style;
+use web3::{
+    transports::eip_1193::{Eip1193, Provider},
+    Web3,
+};
 
 pub struct ConnectButton {
     pub status: State,
@@ -21,10 +26,11 @@ impl IsElmComponent for ConnectButton {
     fn update(&mut self, msg: State, tx_view: broadcast::Sender<State>) {
         if let State::Connect = msg {
             self.status = State::Connecting;
-            let out = State::Connecting;
             mogwai::spawn(async move {
-                // TODO: web3
-                tx_view.broadcast(out).await.unwrap();
+                tx_view.broadcast(State::Connecting).await.unwrap();
+                web3::block_on(connect_web3()).unwrap();
+                // connect_web3().await.unwrap();
+                tx_view.broadcast(State::Connected).await.unwrap();
             });
         }
     }
@@ -73,6 +79,20 @@ fn map_status(status: &State) -> String {
         State::Error => "Error",
     }
     .to_string()
+}
+
+pub async fn connect_web3() -> web3::Result<()> {
+    if let Some(provider) = Provider::default().unwrap() {
+        let transport = Eip1193::new(provider);
+        let web3 = Web3::new(transport);
+        info!("requesting...");
+        // let accounts = web3::block_on(web3.eth().request_accounts())?;
+        let accounts = web3.eth().request_accounts().await?;
+        info!("accounts: {:?}", accounts);
+        Ok(())
+    } else {
+        Err("fail".to_string().into())
+    }
 }
 
 pub fn new() -> Component<Dom> {
