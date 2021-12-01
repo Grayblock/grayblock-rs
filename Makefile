@@ -4,11 +4,11 @@ bootstrap:
 	cargo install --force --locked trunk
 
 dev:
-	cd frontend && trunk serve --release
+	cd frontend && trunk serve
 
 all:
-	cd frontend && cargo clippy && trunk build --release
-	cd design && cargo clippy && trunk build --release
+	cd frontend && cargo clippy && trunk build
+	cd design && cargo clippy && trunk build
 	cd backend && cargo clippy && RUSTFLAGS="-Ctarget-cpu=native" cargo build --release
 	cargo doc
 

@@ -620,24 +620,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "grayblock-frontend"
-version = "0.0.0"
-dependencies = [
- "console_error_panic_hook",
- "console_log 0.2.0",
- "log",
- "mogwai",
- "serde",
- "serde_json",
- "stylist",
- "wasm-bindgen",
- "wasm-bindgen-test",
- "web-sys",
- "web3 0.18.0 (git+https://github.com/tomusdrw/rust-web3.git?rev=5f8b29e643964d4b0fbef683966a83c38c042603)",
-]
-
-[[package]]
-name = "grayblock-ui"
+name = "grayblock-design"
 version = "0.0.0"
 dependencies = [
  "console_error_panic_hook",
@@ -651,6 +634,24 @@ dependencies = [
  "wasm-bindgen-test",
  "web-sys",
  "web3 0.18.0 (git+https://github.com/tomusdrw/rust-web3.git?rev=1f807bb7c288a1d2668c691839381786065b2eac)",
+]
+
+[[package]]
+name = "grayblock-frontend"
+version = "0.0.0"
+dependencies = [
+ "console_error_panic_hook",
+ "console_log 0.2.0",
+ "grayblock-design",
+ "log",
+ "mogwai",
+ "serde",
+ "serde_json",
+ "stylist",
+ "wasm-bindgen",
+ "wasm-bindgen-test",
+ "web-sys",
+ "web3 0.18.0 (git+https://github.com/tomusdrw/rust-web3.git?rev=5f8b29e643964d4b0fbef683966a83c38c042603)",
 ]
 
 [[package]]

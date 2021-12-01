@@ -1,5 +1,5 @@
 [package]
-name = "grayblock-ui"
+name = "grayblock-design"
 description = "Grayblock's Mogwai UI components library and design system"
 version = "0.0.0"
 edition = "2021"

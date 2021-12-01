@@ -64,7 +64,7 @@ impl IsElmComponent for ConnectButton {
         .unwrap();
 
         builder! {
-            <button class={styles.get_class_name()} on:click=tx.sink().with(|_| async {Ok(State::Connect)})>
+            <button class=styles.get_class_name() on:click=tx.sink().with(|_| async {Ok(State::Connect)})>
                 {(
                     map_status(&self.status),
                     rx.map(|msg| map_status(&msg))

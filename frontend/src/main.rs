@@ -2,7 +2,6 @@
 use log::{trace, Level};
 use mogwai::prelude::*;
 use std::panic;
-use stylist::style;
 use wasm_bindgen::prelude::*;
 use web_sys::HashChangeEvent;
 
@@ -10,11 +9,10 @@ use web_sys::HashChangeEvent;
 #[derive(Clone, Debug, PartialEq)]
 pub enum Route {
     Home,
-    Settings,
-    Profile {
-        username: String,
-        is_favorites: bool,
-    },
+    About,
+    Dashboard,
+    Offerings,
+    Projects,
 }
 
 /// We'll use TryFrom::try_from to convert the window's url hash into a Route.
@@ -36,17 +34,10 @@ impl TryFrom<&str> for Route {
         match paths.as_slice() {
             [""] => Ok(Route::Home),
             ["", ""] => Ok(Route::Home),
-            ["", "settings"] => Ok(Route::Settings),
-            // Here you can see that profile may match two different routes -
-            // '#/profile/{username}' and '#/profile/{username}/favorites'
-            ["", "profile", username] => Ok(Route::Profile {
-                username: username.to_string(),
-                is_favorites: false,
-            }),
-            ["", "profile", username, "favorites"] => Ok(Route::Profile {
-                username: username.to_string(),
-                is_favorites: true,
-            }),
+            ["", "about"] => Ok(Route::About),
+            ["", "dashboard"] => Ok(Route::Dashboard),
+            ["", "offerings"] => Ok(Route::Offerings),
+            ["", "projects"] => Ok(Route::Projects),
             r => Err(format!("unsupported route: {:?}", r)),
         }
     }
@@ -69,17 +60,10 @@ impl From<Route> for String {
     fn from(route: Route) -> String {
         match route {
             Route::Home => "#/".into(),
-            Route::Settings => "#/settings".into(),
-            Route::Profile {
-                username,
-                is_favorites,
-            } => {
-                if is_favorites {
-                    format!("#/profile/{}/favorites", username)
-                } else {
-                    format!("#/profile/{}", username)
-                }
-            }
+            Route::About => "#/about".into(),
+            Route::Dashboard => "#/dashboard".into(),
+            Route::Offerings => "#/offerings".into(),
+            Route::Projects => "#/projects".into(),
         }
     }
 }
@@ -90,80 +74,34 @@ impl From<Route> for String {
 /// is just one of many ways to accomplish that.
 impl From<&Route> for ViewBuilder<Dom> {
     fn from(route: &Route) -> Self {
-        let button = style!(
-            r#"
-                background-color: #1fc7d4;
-                color: #fff;
-                width: 100%;
-                padding: 24px;
-                height: 48px;
-                font-size: 16px;
-                font-weight: 600;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 16px;
-                border: none;
-                outline: none;
-            "#
-        )
-        .unwrap();
-
         match route {
             Route::Home => builder! {
                 <main>
-                    <h1>"Welcome to the homepage"</h1>
-                    <button class={button.get_class_name()}>"Unlock Wallet"</button>
+                    <h1>"Grayblock Power"</h1>
+                    {grayblock_design::connect_button::new()}
                 </main>
             },
-            Route::Settings => builder! {
+            Route::About => builder! {
                 <main>
-                    <h1>"Update your settings"</h1>
+                    <h1>"About Grayblock Power"</h1>
                 </main>
             },
-            Route::Profile {
-                username,
-                is_favorites,
-            } => builder! {
+            Route::Dashboard => builder! {
                 <main>
-                    <h1>{username}"'s Profile"</h1>
-                    {if *is_favorites {
-                        Some(builder!{
-                            <h2>"Favorites"</h2>
-                        })
-                    } else {
-                        None
-                    }}
+                    <h1>"Dashboard"</h1>
+                </main>
+            },
+            Route::Offerings => builder! {
+                <main>
+                    <h1>"Energy Lending Offerings"</h1>
+                </main>
+            },
+            Route::Projects => builder! {
+                <main>
+                    <h1>"Energy Projects"</h1>
                 </main>
             },
         }
-    }
-}
-
-/// Here we'll define some helpers for displaying information about the current route.
-impl Route {
-    pub fn nav_home_class(&self) -> String {
-        match self {
-            Route::Home => "nav-link active",
-            _ => "nav-link",
-        }
-        .to_string()
-    }
-
-    pub fn nav_settings_class(&self) -> String {
-        match self {
-            Route::Settings { .. } => "nav-link active",
-            _ => "nav-link",
-        }
-        .to_string()
-    }
-
-    pub fn nav_profile_class(&self) -> String {
-        match self {
-            Route::Profile { .. } => "nav-link active",
-            _ => "nav-link",
-        }
-        .to_string()
     }
 }
 
@@ -210,7 +148,6 @@ fn view(
     rx_view: broadcast::Receiver<AppError>,
     rx_route_patch: mpmc::Receiver<ListPatch<ViewBuilder<Dom>>>,
 ) -> ViewBuilder<Dom> {
-    let username: String = "Grayblock Power".into();
     builder! {
         <slot
             window:hashchange=tx_logic.sink().contra_map(|ev:Event| {
@@ -221,19 +158,20 @@ fn view(
             patch:children=rx_route_patch>
             <nav>
                 <ul>
-                    <li class=route.nav_home_class()>
+                    <li>
                         <a href=String::from(Route::Home)>"Home"</a>
                     </li>
-                    <li class=route.nav_settings_class()>
-                        <a href=String::from(Route::Settings)>"Settings"</a>
+                    <li>
+                        <a href=String::from(Route::About)>"About"</a>
                     </li>
-                    <li class=route.nav_settings_class()>
-                        <a href=String::from(Route::Profile {
-                            username: username.clone(),
-                            is_favorites: true
-                        })>
-                            {format!("{}'s Profile", username)}
-                        </a>
+                    <li>
+                        <a href=String::from(Route::Dashboard)>"Dashboard"</a>
+                    </li>
+                    <li>
+                        <a href=String::from(Route::Offerings)>"Offerings"</a>
+                    </li>
+                    <li>
+                        <a href=String::from(Route::Projects)>"Projects"</a>
                     </li>
                 </ul>
             </nav>
