@@ -32,7 +32,6 @@ impl IsElmComponent for ConnectButton {
             self.status = State::Connecting;
             mogwai::spawn(async move {
                 tx_view.broadcast(State::Connecting).await.unwrap();
-                // web3::block_on(connect_web3()).unwrap();
                 connect_web3().await;
                 tx_view.broadcast(State::Connected).await.unwrap();
             });
