@@ -633,7 +633,7 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-test",
  "web-sys",
- "web3",
+ "web3 0.18.0 (git+https://github.com/tomusdrw/rust-web3.git?rev=5f8b29e643964d4b0fbef683966a83c38c042603)",
 ]
 
 [[package]]
@@ -650,7 +650,7 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-test",
  "web-sys",
- "web3",
+ "web3 0.18.0 (git+https://github.com/tomusdrw/rust-web3.git?rev=1f807bb7c288a1d2668c691839381786065b2eac)",
 ]
 
 [[package]]
@@ -2103,6 +2103,36 @@ checksum = "38eb105f1c59d9eaa6b5cdc92b859d85b926e82cb2e0945cd0c9259faa6fe9fb"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "web3"
+version = "0.18.0"
+source = "git+https://github.com/tomusdrw/rust-web3.git?rev=1f807bb7c288a1d2668c691839381786065b2eac#1f807bb7c288a1d2668c691839381786065b2eac"
+dependencies = [
+ "arrayvec",
+ "derive_more",
+ "ethabi",
+ "ethereum-types",
+ "futures",
+ "futures-timer",
+ "getrandom",
+ "hex",
+ "idna",
+ "js-sys",
+ "jsonrpc-core",
+ "log",
+ "once_cell",
+ "parking_lot",
+ "pin-project",
+ "rand",
+ "rlp",
+ "secp256k1",
+ "serde",
+ "serde_json",
+ "tiny-keccak",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]

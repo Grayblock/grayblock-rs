@@ -1,6 +1,10 @@
-use log::info;
+use futures::{SinkExt, StreamExt};
 use mogwai::prelude::*;
 use stylist::style;
+
+#[cfg(target_arch = "wasm32")]
+use log::info;
+#[cfg(target_arch = "wasm32")]
 use web3::{
     transports::eip_1193::{Eip1193, Provider},
     Web3,
@@ -28,8 +32,8 @@ impl IsElmComponent for ConnectButton {
             self.status = State::Connecting;
             mogwai::spawn(async move {
                 tx_view.broadcast(State::Connecting).await.unwrap();
-                web3::block_on(connect_web3()).unwrap();
-                // connect_web3().await.unwrap();
+                // web3::block_on(connect_web3()).unwrap();
+                connect_web3().await;
                 tx_view.broadcast(State::Connected).await.unwrap();
             });
         }
@@ -81,17 +85,15 @@ fn map_status(status: &State) -> String {
     .to_string()
 }
 
-pub async fn connect_web3() -> web3::Result<()> {
+pub async fn connect_web3() {
+    #[cfg(target_arch = "wasm32")]
     if let Some(provider) = Provider::default().unwrap() {
         let transport = Eip1193::new(provider);
         let web3 = Web3::new(transport);
         info!("requesting...");
         // let accounts = web3::block_on(web3.eth().request_accounts())?;
-        let accounts = web3.eth().request_accounts().await?;
+        let accounts = web3.eth().request_accounts().await.unwrap();
         info!("accounts: {:?}", accounts);
-        Ok(())
-    } else {
-        Err("fail".to_string().into())
     }
 }
 
