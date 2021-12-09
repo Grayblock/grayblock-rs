@@ -17,8 +17,7 @@ pub fn view() -> ViewBuilder<Dom> {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 8vw;
-            padding-bottom: 20vmax;
+            padding: 0 8vw 20vmax;
 
             h1 {
                 text-align: center;
@@ -41,6 +40,7 @@ pub fn view() -> ViewBuilder<Dom> {
                 font-family: Manrope;
                 font-weight: 400;
                 font-size: calc((1.4 - 1) * 1.2vw + 1rem);
+                text-align: center;
                 margin: 1rem 0;
             }
 
@@ -50,6 +50,20 @@ pub fn view() -> ViewBuilder<Dom> {
                 font-size: calc((1.5 - 1) * 1.2vw + 1rem);
                 font-weight: 500;
              }
+
+            @media only screen and (max-width: 800px) {
+                & {
+                    padding: 0 0 20vmax;
+                }
+
+                h1 {
+                    font-size: calc((3.6 - 1) * 1.2vh + 1rem);
+                }
+
+                h2 {
+                    font-size: calc((1.4 - 1) * 1.2vh + 1rem);
+                }
+            }
         "#
     )
     .unwrap();
@@ -66,6 +80,15 @@ pub fn view() -> ViewBuilder<Dom> {
                 width: auto;
                 max-width: 100%;
                 max-height: 178px;
+            }
+
+            @media only screen and (max-width: 800px) {
+                a > img {
+                    height: 178px;
+                    width: 130px;
+                    object-fit: cover;
+                    object-position: top left;
+                }
             }
         "#
     )
