@@ -614,6 +614,8 @@ dependencies = [
 name = "grayblock-backend"
 version = "0.0.0"
 dependencies = [
+ "grayblock-frontend",
+ "mogwai",
  "pretty_env_logger",
  "tokio",
  "warp",
@@ -633,7 +635,7 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-test",
  "web-sys",
- "web3 0.18.0 (git+https://github.com/tomusdrw/rust-web3.git?rev=1f807bb7c288a1d2668c691839381786065b2eac)",
+ "web3",
 ]
 
 [[package]]
@@ -651,7 +653,7 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-test",
  "web-sys",
- "web3 0.18.0 (git+https://github.com/tomusdrw/rust-web3.git?rev=5f8b29e643964d4b0fbef683966a83c38c042603)",
+ "web3",
 ]
 
 [[package]]
@@ -2110,36 +2112,6 @@ dependencies = [
 name = "web3"
 version = "0.18.0"
 source = "git+https://github.com/tomusdrw/rust-web3.git?rev=1f807bb7c288a1d2668c691839381786065b2eac#1f807bb7c288a1d2668c691839381786065b2eac"
-dependencies = [
- "arrayvec",
- "derive_more",
- "ethabi",
- "ethereum-types",
- "futures",
- "futures-timer",
- "getrandom",
- "hex",
- "idna",
- "js-sys",
- "jsonrpc-core",
- "log",
- "once_cell",
- "parking_lot",
- "pin-project",
- "rand",
- "rlp",
- "secp256k1",
- "serde",
- "serde_json",
- "tiny-keccak",
- "wasm-bindgen",
- "wasm-bindgen-futures",
-]
-
-[[package]]
-name = "web3"
-version = "0.18.0"
-source = "git+https://github.com/tomusdrw/rust-web3.git?rev=5f8b29e643964d4b0fbef683966a83c38c042603#5f8b29e643964d4b0fbef683966a83c38c042603"
 dependencies = [
  "arrayvec",
  "derive_more",

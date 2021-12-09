@@ -17,7 +17,7 @@ pub fn view() -> ViewBuilder<Dom> {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 0 8vw 20vmax;
+            padding: 8vw 8vw 20vmax;
 
             h1 {
                 text-align: center;
@@ -123,6 +123,10 @@ pub fn view() -> ViewBuilder<Dom> {
                 color: #000;
                 opacity: 0.8;
             }
+
+            &:visited {
+                color: #000;
+            }
         "#
     )
     .unwrap();
@@ -141,7 +145,7 @@ pub fn view() -> ViewBuilder<Dom> {
             <main class=main.get_class_name()>
                 <h1>"The Future of Energy Finance, Built on "<span>"Avalanche"</span></h1>
                 <h2>"crowdfunding clean energy projects with crypto"</h2>
-                <a class=button.get_class_name() href="https://discord.gg/grayblockpower">"Launch Testnet Demo"</a>
+                <a class=button.get_class_name() href="https://demo.grayblockpower.com/">"Launch Testnet Demo"</a>
             </main>
         </div>
     }

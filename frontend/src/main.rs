@@ -3,7 +3,7 @@ use mogwai::prelude::*;
 use std::panic;
 use wasm_bindgen::prelude::*;
 
-mod home;
+use grayblock_frontend::home;
 
 pub fn main() -> Result<(), JsValue> {
     panic::set_hook(Box::new(console_error_panic_hook::hook));
