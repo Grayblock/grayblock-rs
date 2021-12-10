@@ -169,8 +169,8 @@ pub fn view() -> ViewBuilder<Dom> {
                 <a href="/"><img src="/static/images/grayblock_power_logo.png" alt="Grayblock Power logo" /></a>
                 <nav class=&nav>
                     <a href="https://medium.com/@grayblockpower">"News"</a>
-                    <a href="/files/project-docs/Grayblock_FAQ.pdf">"FAQ"</a>
-                    <a href="/files/project-docs/Grayblock_Whitepaper.pdf">"Whitepaper"</a>
+                    <a href="/files/site-docs/Grayblock_FAQ.pdf">"FAQ"</a>
+                    <a href="/files/site-docs/Grayblock_Whitepaper.pdf">"Whitepaper"</a>
                     <a class=&button href="https://discord.gg/grayblockpower">"Join Community"</a>
                 </nav>
             </header>
