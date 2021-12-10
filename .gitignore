@@ -6,3 +6,4 @@ pkg/
 wasm-pack.log
 .cargo-ok
 .DS_Store
+.env

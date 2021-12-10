@@ -4,7 +4,7 @@ use mogwai::prelude::*;
 use std::panic;
 use wasm_bindgen::prelude::*;
 
-pub mod connect_button;
+use grayblock_design::connect_button;
 
 fn view() -> ViewBuilder<Dom> {
     builder! {
