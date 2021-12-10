@@ -1,7 +1,17 @@
 use mogwai::prelude::*;
 use stylist::style;
 
-pub fn view() -> ViewBuilder<Dom> {
+use crate::util::get_styles;
+
+pub struct HomeStyles {
+    wrap: String,
+    main: String,
+    header: String,
+    nav: String,
+    button: String,
+}
+
+pub fn styles(stylesheet: &mut Vec<String>) -> HomeStyles {
     let wrap = style!(
         r#"
             width: 100%;
@@ -17,7 +27,7 @@ pub fn view() -> ViewBuilder<Dom> {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 8vw 8vw 20vmax;
+            padding: 8vw 8vw 20vmin;
 
             h1 {
                 text-align: center;
@@ -53,7 +63,7 @@ pub fn view() -> ViewBuilder<Dom> {
 
             @media only screen and (max-width: 800px) {
                 & {
-                    padding: 0 0 20vmax;
+                    padding: 0 0 20vmin;
                 }
 
                 h1 {
@@ -131,21 +141,43 @@ pub fn view() -> ViewBuilder<Dom> {
     )
     .unwrap();
 
+    let styles = HomeStyles {
+        wrap: wrap.get_class_name().to_owned(),
+        main: main.get_class_name().to_owned(),
+        header: header.get_class_name().to_owned(),
+        nav: nav.get_class_name().to_owned(),
+        button: button.get_class_name().to_owned(),
+    };
+
+    stylesheet.push(get_styles(&[wrap, main, header, nav, button]));
+
+    styles
+}
+
+pub fn view() -> ViewBuilder<Dom> {
+    let HomeStyles {
+        wrap,
+        main,
+        header,
+        nav,
+        button,
+    } = styles(&mut vec![]);
+
     builder! {
-        <div class=wrap.get_class_name()>
-            <header class=header.get_class_name()>
+        <div class=&wrap>
+            <header class=&header>
                 <a href="/"><img src="/static/images/grayblock_power_logo.png" alt="Grayblock Power logo" /></a>
-                <nav class=nav.get_class_name()>
+                <nav class=&nav>
                     <a href="https://medium.com/@grayblockpower">"News"</a>
                     <a href="/files/project-docs/Grayblock_FAQ.pdf">"FAQ"</a>
                     <a href="/files/project-docs/Grayblock_Whitepaper.pdf">"Whitepaper"</a>
-                    <a class=button.get_class_name() href="https://discord.gg/grayblockpower">"Join Community"</a>
+                    <a class=&button href="https://discord.gg/grayblockpower">"Join Community"</a>
                 </nav>
             </header>
-            <main class=main.get_class_name()>
+            <main class=&main>
                 <h1>"The Future of Energy Finance, Built on "<span>"Avalanche"</span></h1>
                 <h2>"crowdfunding clean energy projects with crypto"</h2>
-                <a class=button.get_class_name() href="https://demo.grayblockpower.com/">"Launch Testnet Demo"</a>
+                <a class=&button href="https://demo.grayblockpower.com/">"Launch Testnet Demo"</a>
             </main>
         </div>
     }

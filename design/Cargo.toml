@@ -9,18 +9,15 @@ publish = false
 default = ["console_error_panic_hook"]
 
 [dependencies]
-# The `console_error_panic_hook` crate provides better debugging of panics by
-# logging them with `console.error`. This is great for development, but requires
-# all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
-# code size when deploying.
 console_error_panic_hook = { version = "0.1.6", optional = true }
 console_log = "0.2"
+futures = "0.3"
 log = "0.4"
+mogwai = "0.5"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-wasm-bindgen = "0.2"
-mogwai = "0.5"
 stylist = "0.9.2"
+wasm-bindgen = "0.2"
 
 [dependencies.web3]
 git = "https://github.com/tomusdrw/rust-web3.git"
@@ -30,7 +27,6 @@ features = ["wasm", "eip-1193", "signing"]
 
 [dependencies.web-sys]
 version = "^0.3"
-# Add more web-sys API's as you need them
 features = ["HtmlInputElement", "HashChangeEvent", "Window"]
 
 [dev-dependencies]

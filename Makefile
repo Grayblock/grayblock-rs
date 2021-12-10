@@ -26,5 +26,6 @@ clean:
 	rm -rf target frontend/dist
 
 ci:
+	cargo clippy --target wasm32-unknown-unknown --lib -- -D warnings
 	cargo clippy -- -D warnings
 	cargo test
