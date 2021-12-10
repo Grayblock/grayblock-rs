@@ -26,9 +26,11 @@ jobs:
         with:
           version: 'latest'
 
+      - name: Add wasm32 target
+        run: rustup target add wasm32-unknown-unknown
       - name: Build frontend
         run: cd frontend && trunk build --release
-      - name: Lint (wasm)
+      - name: Lint (wasm32)
         run: cargo clippy --target wasm32-unknown-unknown --lib -- -D warnings
       - name: Lint (native)
         run: cargo clippy -- -D warnings
