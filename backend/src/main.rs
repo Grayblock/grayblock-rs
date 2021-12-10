@@ -1,6 +1,7 @@
 use grayblock_frontend::home;
 use mogwai::prelude::*;
-use warp::Filter;
+use once_cell::sync::Lazy;
+use tide::{http::mime, Response};
 
 fn build_view(view_builder: ViewBuilder<Dom>) -> String {
     let index_html = include_str!("../../frontend/dist/index.html");
@@ -13,28 +14,38 @@ fn build_view(view_builder: ViewBuilder<Dom>) -> String {
     src
 }
 
-#[tokio::main]
-async fn main() {
-    pretty_env_logger::init();
-
+static HOME_SRC: Lazy<String> = Lazy::new(|| build_view(home::view()));
+static STYLES_SRC: Lazy<String> = Lazy::new(|| {
     let mut styles: Vec<String> = vec![];
     home::styles(&mut styles);
+    styles.join("\n\n")
+});
 
-    let stylesheet_src = styles.join("\n\n");
-    let stylesheet = warp::get()
-        .and(warp::path!("styles.css"))
-        .map(move || warp::reply::with_header(stylesheet_src.clone(), "Content-Type", "text/css"));
+#[async_std::main]
+async fn main() -> Result<(), std::io::Error> {
+    pretty_env_logger::init();
 
-    let home_src = build_view(home::view());
-    let home = warp::get()
-        .and(warp::path::end())
-        .map(move || warp::reply::html(home_src.clone()));
+    let mut app = tide::new();
 
-    let static_dir = warp::any().and(warp::fs::dir("frontend/dist"));
+    app.at("/styles.css").get(|_| async {
+        Ok(Response::builder(200)
+            .body(STYLES_SRC.clone())
+            .content_type(mime::CSS)
+            .build())
+    });
 
-    let app = stylesheet.or(home).or(static_dir);
+    app.at("/").get(|_| async {
+        Ok(Response::builder(200)
+            .body(HOME_SRC.clone())
+            .content_type(mime::HTML)
+            .build())
+    });
+
+    app.at("/*").serve_dir("frontend/dist/")?;
 
     println!("Running backend server on port 8080");
 
-    warp::serve(app).run(([127, 0, 0, 1], 8080)).await;
+    app.listen("localhost:8080").await?;
+
+    Ok(())
 }
