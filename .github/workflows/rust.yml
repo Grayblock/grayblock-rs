@@ -26,7 +26,11 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Lint
+      - name: Build frontend
+        run: cd frontend && trunk build --release
+      - name: Lint (wasm)
+        run: cargo clippy --target wasm32-unknown-unknown --lib -- -D warnings
+      - name: Lint (native)
         run: cargo clippy -- -D warnings
       - name: Test
         run: cargo test --verbose
