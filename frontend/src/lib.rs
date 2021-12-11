@@ -1,8 +1,4 @@
-pub mod about;
-pub mod components;
-pub mod dashboard;
-pub mod home;
-pub mod layout;
-pub mod offerings;
-pub mod projects;
+pub mod app;
+mod components;
+mod pages;
 mod util;

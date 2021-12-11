@@ -7,7 +7,7 @@ pub struct LayoutStyles {
     wrap: String,
     header: String,
     nav: String,
-    button: String,
+    icon: String,
 }
 
 pub fn styles(stylesheet: &mut Vec<String>) -> LayoutStyles {
@@ -55,24 +55,40 @@ pub fn styles(stylesheet: &mut Vec<String>) -> LayoutStyles {
             padding: 1rem;
             padding-left: 0;
 
+            & > nav {
+                display: flex;
+                padding-bottom: 0;
+                justify-content: space-between;
+            }
+
             a {
                 display: inline-block;
                 line-height: 1.5em;
                 font-size: 1em;
                 text-decoration: none;
-                margin-left: 1.7vw;
+                margin-left: 1rem;
+                padding: 0.25rem 0.75rem;
+            }
+
+            a:hover {
+                background-color: #fff;
+                color: #000;
+                border-radius: 0.25rem;
+                padding: 0.25rem 0.75rem;
+            }
+
+            a:visited {
+                color: #fff;
             }
         "#
     )
     .unwrap();
 
-    let button = style!(
+    let icon = style!(
         r#"
             line-height: 1.2em;
-            color: #000;
-            background-color: #fff;
             border-radius: 0.25rem;
-            padding: 0.8rem 1.336rem;
+            padding: 0;
             margin-left: 2.5vw;
             text-decoration: none;
 
@@ -92,10 +108,10 @@ pub fn styles(stylesheet: &mut Vec<String>) -> LayoutStyles {
         wrap: wrap.get_class_name().to_owned(),
         header: header.get_class_name().to_owned(),
         nav: nav.get_class_name().to_owned(),
-        button: button.get_class_name().to_owned(),
+        icon: icon.get_class_name().to_owned(),
     };
 
-    stylesheet.push(get_styles(&[wrap, header, nav, button]));
+    stylesheet.push(get_styles(&[wrap, header, nav, icon]));
 
     styles
 }
@@ -105,25 +121,37 @@ pub fn view(content: ViewBuilder<Dom>) -> ViewBuilder<Dom> {
         wrap,
         header,
         nav,
-        button,
+        icon,
     } = styles(&mut vec![]);
 
     builder! {
         <div class=&wrap>
             <header class=&header>
-                <a href="/"><img src="/static/images/grayblock_power_logo.png" alt="Grayblock Power logo" /></a>
+                <a href="/">
+                    <img src="/static/images/grayblock_power_logo.png" alt="Grayblock Power logo" />
+                </a>
                 <nav class=&nav>
                     <a href="/dashboard">"Dashboard"</a>
-                    <a href="/offerings">"Offerings"</a>
-                    <a href="/projects">"Projects"</a>
-                    <a href="/about">"About"</a>
-                    <a href="https://medium.com/@grayblockpower">"News"</a>
-                    <a href="/files/site-docs/Grayblock_FAQ.pdf">"FAQ"</a>
-                    <a href="/files/site-docs/Grayblock_Whitepaper.pdf">"Whitepaper"</a>
-                    <a class=&button href="https://discord.gg/grayblockpower">"Join Community"</a>
+                    <a href="/projects">"Back a Project"</a>
+                    <a href="/staking">"Energy Staking"</a>
+                    <a href="/organization">"Organization"</a>
+                    <a class=icon href="https://discord.gg/grayblockpower">
+                        <img src="/static/images/discord.svg" height="25" />
+                    </a>
                 </nav>
             </header>
             {content}
         </div>
     }
 }
+
+/*
+    <nav class=&nav>
+        <a href="/about">"About"</a>
+        <a href="/how-it-works">"How it works"</a>
+        <a href="/community">"Join community"</a>
+        <a href="/news">"News"</a>
+        <a href="/faq">"FAQ"</a>
+        <a href="/whitepaper">"Whitepaper"</a>
+    </nav>
+*/

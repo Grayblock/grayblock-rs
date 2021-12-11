@@ -1,20 +1,18 @@
 use std::env;
 
-use grayblock_frontend::home;
-use mogwai::prelude::*;
+use grayblock_frontend::app;
 use warp::{path::Peek, Filter};
 
 mod object_storage;
 
-fn build_view(view_builder: ViewBuilder<Dom>) -> String {
+fn render_page(path: &str) -> Result<String, String> {
     let index_html = include_str!("../../frontend/dist/index.html");
-    let view = Component::from(view_builder).build().unwrap();
-    let html = String::from(view);
+    let page_src = app::view(path)?;
 
-    let mut src = index_html.replace("Please enable JavaScript", &html);
+    let mut src = index_html.replace("Please enable JavaScript", &page_src);
     src.push_str("<link href=\"styles.css\" rel=\"stylesheet\">");
 
-    src
+    Ok(src)
 }
 
 #[tokio::main]
@@ -26,18 +24,19 @@ async fn main() {
     pretty_env_logger::init();
     zenv::zenv!();
 
-    let mut styles: Vec<String> = vec![];
-    home::styles(&mut styles);
+    let stylesheet_src = app::styles();
 
-    let stylesheet_src = styles.join("\n\n");
     let stylesheet = warp::get()
         .and(warp::path!("styles.css"))
         .map(move || warp::reply::with_header(stylesheet_src.clone(), "Content-Type", "text/css"));
 
-    let home_src = build_view(home::view());
-    let home = warp::get()
+    let page = warp::get()
         .and(warp::path::end())
-        .map(move || warp::reply::html(home_src.clone()));
+        .and(warp::path::peek())
+        .map(move |path: Peek| match render_page(path.as_str()) {
+            Ok(page_src) => warp::reply::html(page_src),
+            Err(_) => warp::reply::html("500 Internal Server Error".to_owned()),
+        });
 
     let files = warp::get()
         .and(warp::path::path("files"))
@@ -56,7 +55,7 @@ async fn main() {
 
     let static_dir = warp::any().and(warp::fs::dir("frontend/dist"));
 
-    let app = stylesheet.or(home).or(files).or(static_dir);
+    let app = stylesheet.or(page).or(files).or(static_dir);
 
     println!("Running backend server on port 8080");
 
