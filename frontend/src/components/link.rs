@@ -2,7 +2,7 @@
 
 use mogwai::prelude::*;
 
-use crate::app::Route;
+use crate::router::Route;
 
 #[allow(dead_code)]
 pub enum Link {

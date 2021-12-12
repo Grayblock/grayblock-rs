@@ -2,8 +2,8 @@ use mogwai::prelude::*;
 use stylist::style;
 
 use crate::{
-    app::{Out, Route},
     components::link::{self, ImgDim, Link},
+    router::{Out, Route},
     util::get_styles,
 };
 
@@ -11,7 +11,6 @@ pub struct LayoutStyles {
     wrap: String,
     header: String,
     nav: String,
-    icon: String,
 }
 
 pub fn styles(stylesheet: &mut Vec<String>) -> LayoutStyles {
@@ -53,36 +52,38 @@ pub fn styles(stylesheet: &mut Vec<String>) -> LayoutStyles {
 
     let nav = style!(
         r#"
-            display: block;
+            display: flex;
             border-radius: 0.5rem;
             background-color: #000;
             padding: 1rem;
-            padding-left: 0;
-
-            & > nav {
-                display: flex;
-                padding-bottom: 0;
-                justify-content: space-between;
-            }
+            padding-left: 1rem;
 
             a {
-                display: inline-block;
+                color: #fff;
+                display: inline-flex;
                 line-height: 1.5em;
                 font-size: 1em;
                 text-decoration: none;
-                margin-left: 1rem;
-                padding: 0.25rem 0.75rem;
+                padding: 0.5rem 0.75rem;
             }
 
             a:hover {
-                background-color: #fff;
-                color: #000;
-                border-radius: 0.25rem;
-                padding: 0.25rem 0.75rem;
+                border: 0.2rem solid #fff;
+                border-radius: 0.2rem;
+                padding: 0.3rem 0.55rem;
             }
 
             a:visited {
                 color: #fff;
+            }
+
+            a.icon {
+                padding: 0.25rem;
+                text-decoration: none;
+            }
+
+            a.icon:hover {
+                padding: 0.05rem;
             }
         "#
     )
@@ -90,20 +91,7 @@ pub fn styles(stylesheet: &mut Vec<String>) -> LayoutStyles {
 
     let icon = style!(
         r#"
-            line-height: 1.2em;
-            border-radius: 0.25rem;
-            padding: 0;
-            margin-left: 2.5vw;
-            text-decoration: none;
 
-            &:hover {
-                color: #000;
-                opacity: 0.8;
-            }
-
-            &:visited {
-                color: #000;
-            }
         "#
     )
     .unwrap();
@@ -112,7 +100,6 @@ pub fn styles(stylesheet: &mut Vec<String>) -> LayoutStyles {
         wrap: wrap.get_class_name().to_owned(),
         header: header.get_class_name().to_owned(),
         nav: nav.get_class_name().to_owned(),
-        icon: icon.get_class_name().to_owned(),
     };
 
     stylesheet.push(get_styles(&[wrap, header, nav, icon]));
@@ -125,12 +112,7 @@ pub fn view(
     rx: broadcast::Receiver<Out>,
     content: ViewBuilder<Dom>,
 ) -> ViewBuilder<Dom> {
-    let LayoutStyles {
-        wrap,
-        header,
-        nav,
-        icon,
-    } = styles(&mut vec![]);
+    let LayoutStyles { wrap, header, nav } = styles(&mut vec![]);
 
     builder! {
         <div class=&wrap>
@@ -151,14 +133,16 @@ pub fn view(
                     {link::image(
                         tx,
                         Link::ExternalTarget("https://discord.gg/grayblockpower".to_owned()),
-                        &icon,
+                        "icon",
                         "/static/images/discord.svg",
                         "Discord Logo",
                         ImgDim::Height(25),
                     )}
                 </nav>
             </header>
-            {content}
+            <slot patch:children=rx.filter_map(|out| async move { out.maybe_patch_route() })>
+                {content}
+            </slot>
         </div>
     }
 }

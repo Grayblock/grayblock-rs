@@ -1,13 +1,12 @@
 use std::env;
 
-use grayblock_frontend::app;
 use warp::{path::Peek, Filter};
 
 mod object_storage;
 
 fn render_page(path: &str) -> Result<String, String> {
     let index_html = include_str!("../../frontend/dist/index.html");
-    let page_src = app::view(path)?;
+    let page_src = grayblock_frontend::view(path)?;
 
     let mut src = index_html.replace("Please enable JavaScript", &page_src);
     src.push_str("<link href=\"styles.css\" rel=\"stylesheet\">");
@@ -24,7 +23,7 @@ async fn main() {
     pretty_env_logger::init();
     zenv::zenv!();
 
-    let stylesheet_src = app::styles();
+    let stylesheet_src = grayblock_frontend::styles();
 
     let stylesheet = warp::get()
         .and(warp::path!("styles.css"))
