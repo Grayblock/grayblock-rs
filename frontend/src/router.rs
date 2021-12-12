@@ -9,7 +9,7 @@ pub enum Route {
     Dashboard,
     Projects,
     Staking,
-    Organization,
+    Learn,
     NotFound,
 }
 
@@ -47,7 +47,7 @@ impl std::fmt::Display for Route {
             Route::Dashboard => f.write_str("/dashboard"),
             Route::Projects => f.write_str("/projects"),
             Route::Staking => f.write_str("/staking"),
-            Route::Organization => f.write_str("/organization"),
+            Route::Learn => f.write_str("/learn"),
             Route::NotFound => f.write_str("/404"),
         }
     }
@@ -65,7 +65,7 @@ impl<T: AsRef<str>> From<T> for Route {
             ["", "dashboard"] => Route::Dashboard,
             ["", "projects"] => Route::Projects,
             ["", "staking"] => Route::Staking,
-            ["", "organization"] => Route::Organization,
+            ["", "learn"] => Route::Learn,
             _ => Route::NotFound,
         }
     }
@@ -78,7 +78,7 @@ impl From<&Route> for ViewBuilder<Dom> {
             Route::Dashboard => pages::dashboard::view(),
             Route::Projects => pages::projects::view(),
             Route::Staking => pages::staking::view(),
-            Route::Organization => pages::organization::view(),
+            Route::Learn => pages::learn::view(),
             Route::NotFound => pages::not_found::view(),
         }
     }

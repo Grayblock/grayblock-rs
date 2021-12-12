@@ -89,20 +89,13 @@ pub fn styles(stylesheet: &mut Vec<String>) -> LayoutStyles {
     )
     .unwrap();
 
-    let icon = style!(
-        r#"
-
-        "#
-    )
-    .unwrap();
-
     let styles = LayoutStyles {
         wrap: wrap.get_class_name().to_owned(),
         header: header.get_class_name().to_owned(),
         nav: nav.get_class_name().to_owned(),
     };
 
-    stylesheet.push(get_styles(&[wrap, header, nav, icon]));
+    stylesheet.push(get_styles(&[wrap, header, nav]));
 
     styles
 }
@@ -129,7 +122,7 @@ pub fn view(
                     {link::text(tx.clone(), Link::Internal(Route::Dashboard), "Dashboard")}
                     {link::text(tx.clone(), Link::Internal(Route::Projects), "Back a Project")}
                     {link::text(tx.clone(), Link::Internal(Route::Staking), "Energy Staking")}
-                    {link::text(tx.clone(), Link::Internal(Route::Organization), "Organization")}
+                    {link::text(tx.clone(), Link::Internal(Route::Learn), "Learn more")}
                     {link::image(
                         tx,
                         Link::ExternalTarget("https://discord.gg/grayblockpower".to_owned()),

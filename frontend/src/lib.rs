@@ -1,7 +1,6 @@
 use mogwai::prelude::*;
 use wasm_bindgen::prelude::*;
 
-pub mod app;
 mod components;
 mod pages;
 pub mod router;
@@ -11,6 +10,7 @@ use router::{Out, Route};
 
 pub fn styles() -> String {
     let mut styles: Vec<String> = vec![];
+    components::layout::styles(&mut styles);
     pages::home::styles(&mut styles);
     styles.join("\n")
 }

@@ -6,10 +6,10 @@ mod object_storage;
 
 fn render_page(path: &str) -> Result<String, String> {
     let index_html = include_str!("../../frontend/dist/index.html");
-    let page_src = grayblock_frontend::view(path)?;
 
-    let mut src = index_html.replace("Please enable JavaScript", &page_src);
-    src.push_str("<link href=\"styles.css\" rel=\"stylesheet\">");
+    let mut page_src = grayblock_frontend::view(format!("/{}", path))?;
+    page_src.push_str("</noscript><link href=\"styles.css\" rel=\"stylesheet\">");
+    let src = index_html.replace("Please enable JavaScript</noscript>", &page_src);
 
     Ok(src)
 }
@@ -29,10 +29,9 @@ async fn main() {
         .and(warp::path!("styles.css"))
         .map(move || warp::reply::with_header(stylesheet_src.clone(), "Content-Type", "text/css"));
 
-    let page = warp::get()
+    let index = warp::get()
         .and(warp::path::end())
-        .and(warp::path::peek())
-        .map(move |path: Peek| match render_page(path.as_str()) {
+        .map(move || match render_page("/") {
             Ok(page_src) => warp::reply::html(page_src),
             Err(_) => warp::reply::html("500 Internal Server Error".to_owned()),
         });
@@ -52,9 +51,16 @@ async fn main() {
             }
         });
 
-    let static_dir = warp::any().and(warp::fs::dir("frontend/dist"));
+    let static_dir = warp::get().and(warp::fs::dir("frontend/dist"));
 
-    let app = stylesheet.or(page).or(files).or(static_dir);
+    let page = warp::get().and(warp::path::peek()).map(move |path: Peek| {
+        match render_page(path.as_str()) {
+            Ok(page_src) => warp::reply::html(page_src),
+            Err(_) => warp::reply::html("500 Internal Server Error".to_owned()),
+        }
+    });
+
+    let app = stylesheet.or(index).or(files).or(static_dir).or(page);
 
     println!("Running backend server on port 8080");
 
