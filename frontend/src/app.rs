@@ -1,4 +1,4 @@
-use crate::{components::layout, pages};
+use crate::{components, pages};
 use mogwai::prelude::*;
 
 pub fn styles() -> String {
@@ -14,13 +14,13 @@ pub enum Out {
     Render { route: Route },
 }
 
-impl Out {
-    fn maybe_patch_route(&self) -> Option<ListPatch<ViewBuilder<Dom>>> {
-        match self {
-            Out::Render { route } => Some(ListPatch::replace(0, route.into())),
-        }
-    }
-}
+// impl Out {
+//     fn maybe_patch_route(&self) -> Option<ListPatch<ViewBuilder<Dom>>> {
+//         match self {
+//             Out::Render { route } => Some(ListPatch::replace(0, route.into())),
+//         }
+//     }
+// }
 
 #[derive(Debug)]
 pub struct App {
@@ -57,18 +57,11 @@ impl App {
     }
 
     fn view(&self, tx: broadcast::Sender<Route>, rx: broadcast::Receiver<Out>) -> ViewBuilder<Dom> {
-        layout::view(match &self.current_route {
-            Route::Home => pages::home::view(),
-            Route::Dashboard => todo!(),
-            Route::Projects => todo!(),
-            Route::Staking => todo!(),
-            Route::Organization => todo!(),
-            Route::NotFound => pages::not_found::view(),
-        })
+        components::layout::view(tx, rx, ViewBuilder::from(&self.current_route))
     }
 }
 
-use mogwai_hydrator::Hydrator;
+// use mogwai_hydrator::Hydrator;
 use wasm_bindgen::prelude::*;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -96,8 +89,9 @@ where
 pub fn new() -> Result<(), JsValue> {
     let initial_route = Route::from(utils::window().location().pathname().unwrap_throw());
     let root: Component<Dom> = App::component(initial_route);
-    let hydrator = Hydrator::try_from(root).map_err(|e| JsValue::from(format!("{}", e)))?;
-    let view = View::from(hydrator);
+    // let hydrator = Hydrator::try_from(root).map_err(|e| JsValue::from(format!("{}", e)))?;
+    // let view = View::from(hydrator);
+    let view = root.build().unwrap();
     view.run()
 }
 
@@ -157,10 +151,10 @@ impl From<&Route> for ViewBuilder<Dom> {
     fn from(route: &Route) -> ViewBuilder<Dom> {
         match route {
             Route::Home => pages::home::view(),
-            Route::Dashboard => todo!(),
-            Route::Projects => todo!(),
-            Route::Staking => todo!(),
-            Route::Organization => todo!(),
+            Route::Dashboard => pages::dashboard::view(),
+            Route::Projects => pages::projects::view(),
+            Route::Staking => pages::staking::view(),
+            Route::Organization => pages::organization::view(),
             Route::NotFound => pages::not_found::view(),
         }
     }

@@ -1,6 +1,7 @@
 use stylist::{style, Style};
 
 pub mod layout;
+pub mod link;
 
 pub fn button() -> Style {
     style!(

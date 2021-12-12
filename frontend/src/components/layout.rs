@@ -1,7 +1,11 @@
 use mogwai::prelude::*;
 use stylist::style;
 
-use crate::util::get_styles;
+use crate::{
+    app::{Out, Route},
+    components::link::{self, ImgDim, Link},
+    util::get_styles,
+};
 
 pub struct LayoutStyles {
     wrap: String,
@@ -116,7 +120,11 @@ pub fn styles(stylesheet: &mut Vec<String>) -> LayoutStyles {
     styles
 }
 
-pub fn view(content: ViewBuilder<Dom>) -> ViewBuilder<Dom> {
+pub fn view(
+    tx: broadcast::Sender<Route>,
+    rx: broadcast::Receiver<Out>,
+    content: ViewBuilder<Dom>,
+) -> ViewBuilder<Dom> {
     let LayoutStyles {
         wrap,
         header,
@@ -127,17 +135,27 @@ pub fn view(content: ViewBuilder<Dom>) -> ViewBuilder<Dom> {
     builder! {
         <div class=&wrap>
             <header class=&header>
-                <a href="/">
-                    <img src="/static/images/grayblock_power_logo.png" alt="Grayblock Power logo" />
-                </a>
+                {link::image(
+                    tx.clone(),
+                    Link::Internal(Route::Home),
+                    "",
+                    "/static/images/grayblock_power_logo.png",
+                    "Grayblock Power Logo",
+                    ImgDim::None,
+                )}
                 <nav class=&nav>
-                    <a href="/dashboard">"Dashboard"</a>
-                    <a href="/projects">"Back a Project"</a>
-                    <a href="/staking">"Energy Staking"</a>
-                    <a href="/organization">"Organization"</a>
-                    <a class=icon href="https://discord.gg/grayblockpower">
-                        <img src="/static/images/discord.svg" height="25" />
-                    </a>
+                    {link::text(tx.clone(), Link::Internal(Route::Dashboard), "Dashboard")}
+                    {link::text(tx.clone(), Link::Internal(Route::Projects), "Back a Project")}
+                    {link::text(tx.clone(), Link::Internal(Route::Staking), "Energy Staking")}
+                    {link::text(tx.clone(), Link::Internal(Route::Organization), "Organization")}
+                    {link::image(
+                        tx,
+                        Link::ExternalTarget("https://discord.gg/grayblockpower".to_owned()),
+                        &icon,
+                        "/static/images/discord.svg",
+                        "Discord Logo",
+                        ImgDim::Height(25),
+                    )}
                 </nav>
             </header>
             {content}
