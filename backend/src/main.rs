@@ -4,14 +4,14 @@ use warp::{path::Peek, Filter};
 
 mod object_storage;
 
-fn render_page(path: &str) -> Result<String, String> {
+fn wrap_page(src: String) -> String {
     let index_html = include_str!("../../frontend/dist/index.html");
-
-    let mut page_src = grayblock_frontend::view(format!("/{}", path))?;
-    page_src.push_str("</noscript><link href=\"styles.css\" rel=\"stylesheet\">");
-    let src = index_html.replace("Please enable JavaScript</noscript>", &page_src);
-
-    Ok(src)
+    index_html
+        .replace(
+            "<!-- styles.css -->",
+            "<link href=\"styles.css\" rel=\"stylesheet\">",
+        )
+        .replace("Please enable JavaScript", &src)
 }
 
 #[tokio::main]
@@ -23,18 +23,46 @@ async fn main() {
     pretty_env_logger::init();
     zenv::zenv!();
 
-    let stylesheet_src = grayblock_frontend::styles();
+    let home_page_src = wrap_page(grayblock_frontend::view("/").unwrap());
+    let dashboard_page_src = wrap_page(grayblock_frontend::view("/dashboard").unwrap());
+    let projects_page_src = wrap_page(grayblock_frontend::view("/projects").unwrap());
+    let staking_page_src = wrap_page(grayblock_frontend::view("/staking").unwrap());
+    let learn_page_src = wrap_page(grayblock_frontend::view("/learn").unwrap());
 
+    let home_route = warp::get()
+        .and(warp::path::end())
+        .map(move || warp::reply::html(home_page_src.clone()));
+
+    let dashboard_route = warp::get()
+        .and(warp::path("dashboard"))
+        .and(warp::path::end())
+        .map(move || warp::reply::html(dashboard_page_src.clone()));
+
+    let projects_route = warp::get()
+        .and(warp::path("projects"))
+        .and(warp::path::end())
+        .map(move || warp::reply::html(projects_page_src.clone()));
+
+    let staking_route = warp::get()
+        .and(warp::path("staking"))
+        .and(warp::path::end())
+        .map(move || warp::reply::html(staking_page_src.clone()));
+
+    let learn_route = warp::get()
+        .and(warp::path("learn"))
+        .and(warp::path::end())
+        .map(move || warp::reply::html(learn_page_src.clone()));
+
+    let pages = home_route
+        .or(dashboard_route)
+        .or(projects_route)
+        .or(staking_route)
+        .or(learn_route);
+
+    let stylesheet_src = grayblock_frontend::styles();
     let stylesheet = warp::get()
         .and(warp::path!("styles.css"))
         .map(move || warp::reply::with_header(stylesheet_src.clone(), "Content-Type", "text/css"));
-
-    let index = warp::get()
-        .and(warp::path::end())
-        .map(move || match render_page("/") {
-            Ok(page_src) => warp::reply::html(page_src),
-            Err(_) => warp::reply::html("500 Internal Server Error".to_owned()),
-        });
 
     let files = warp::get()
         .and(warp::path::path("files"))
@@ -53,14 +81,7 @@ async fn main() {
 
     let static_dir = warp::get().and(warp::fs::dir("frontend/dist"));
 
-    let page = warp::get().and(warp::path::peek()).map(move |path: Peek| {
-        match render_page(path.as_str()) {
-            Ok(page_src) => warp::reply::html(page_src),
-            Err(_) => warp::reply::html("500 Internal Server Error".to_owned()),
-        }
-    });
-
-    let app = stylesheet.or(index).or(files).or(static_dir).or(page);
+    let app = pages.or(stylesheet).or(files).or(static_dir);
 
     println!("Running backend server on port 8080");
 
